@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js Server | Fabian Lugo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        socket.on('connect', function() {
+            console.log('Conectado al servidor')
+        })
+
+        socket.on('disconnect', function() {
+            console.log('Perdimos conexión con el servidor')
+        })
+
+        socket.emit('message', {nombre: 'Fabian'});
+
+        socket.on('mensaje', function(payload) {
+            console.log('Escuchando:', payload)
+        })
+        
+    </script>
+    <script>
+        // Pretty Console Interceptor
+        (function() {
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            const originalInfo = console.info;
+
+            const style = (bg, fg) => `background: ${bg}; color: ${fg}; padding: 2px 5px; border-radius: 3px; font-weight: bold; font-family: 'SF Pro Text', sans-serif;`;
+
+            const noise = ['CORS', 'Access-Control', 'MIME type', '404', 'net::ERR', 'React Router', 'location "/repo"'];
+            const isNoise = (args) => args.some(arg => typeof arg === 'string' && noise.some(n => arg.includes(n)));
+
+            console.log = function(...args) {
+                if (isNoise(args)) return;
+                originalLog.apply(console, ["%c LOG ", style('#8e8e93', 'white'), ...args]);
+            };
+            console.error = function(...args) {
+                if (isNoise(args)) return;
+                originalError.apply(console, ["%c ERROR ", style('#ff3b30', 'white'), ...args]);
+            };
+            console.warn = function(...args) {
+                if (isNoise(args)) return;
+                originalWarn.apply(console, ["%c WARN ", style('#ff9500', 'white'), ...args]);
+            };
+            console.info = function(...args) {
+                if (isNoise(args)) return;
+                originalInfo.apply(console, ["%c INFO ", style('#007aff', 'white'), ...args]);
+            };
+            
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                if (isNoise([msg])) return true;
+                console.error(`${msg} at ${url}:${lineNo}:${columnNo}`);
+                return true; 
+            };
+            window.onunhandledrejection = function(event) {
+                if (isNoise([event.reason])) return;
+                console.error('Unhandled Promise Rejection:', event.reason);
+            };
+        })();
+    </script>
+</head>
+<body onload="initApp()">
+
+
+    <audio id="popSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="minSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2582/2582-preview.mp3"></audio>
+    <audio id="clickSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="hoverSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2565/2565-preview.mp3"></audio>
+    <audio id="maxSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+
+    <svg style="position:absolute;width:0;height:0">
+        <defs>
+            <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#8E5CF7" />
+                <stop offset="100%" style="stop-color:#4285F4" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div id="finder-window">
+        <div class="safari-bar">
+            <div class="dots">
+                <div class="dot close" onclick="closeTargetApp('finder-window')"><span>✕</span></div>
+                <div class="dot min" onclick="closeTargetApp('finder-window')"><span>−</span></div>
+                <div class="dot max disabled-dot"><span>○</span></div>
+            </div>
+            <div style="margin-left: 20px; font-size: 13px; font-weight: 600; color: #555;">iCloud Drive</div>
+        </div>
+        <div class="finder-container">
+            <div class="finder-sidebar">
+                <div class="sidebar-item active"><span class="sidebar-icon">☁️</span> iCloud Drive</div>
+                <div class="sidebar-item"><span class="sidebar-icon">🏠</span> Fabian</div>
+                <div class="sidebar-item"><span class="sidebar-icon">💻</span> Macbook Air</div>
+                <div class="sidebar-item"><span class="sidebar-icon">📂</span> Applications</div>
+            </div>
+            <div class="finder-content" id="finder-main-content">
+                <div class="file-item" ondblclick="enterServerFolder()">
+                    <img class="file-icon" src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Folder">
+                    <span class="file-name">Server</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="safari-window">
+        <div class="safari-bar">
+            <div class="dots">
+                <div class="dot close" onclick="closeTargetApp('safari-window')"><span>✕</span></div>
+                <div class="dot min" onclick="closeTargetApp('safari-window')"><span>−</span></div>
+                <div class="dot max disabled-dot"><span>○</span></div>
+            </div>
+        <div class="safari-address" id="safari-url-display">github.com/Fabian-Lugo/flutter-book-names</div>
+        </div>
+        <div id="safari-content" style="flex:1; background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+            <svg height="64" viewBox="0 0 16 16" width="64" fill="currentColor" style="margin-bottom: 20px; color: #f0f6fc;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+            <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">flutter-book-names</h2>
+            <p style="color: #8b949e; font-size: 14px; margin-bottom: 24px;">Repositorio oficial de la aplicación de nombres de libros.</p>
+            <a href="https://github.com/Fabian-Lugo/flutter-book-names" target="_blank" class="github-btn" style="background-color: #238636; color: #ffffff; border: 1px solid rgba(240,246,252,0.1); padding: 8px 16px; border-radius: 6px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path></svg>
+                Ver Repositorio en GitHub
+            </a>
+        </div>
+    </div>
+
+    <div id="settings-window">
+        <div class="safari-bar">
+            <div class="dots">
+                <div class="dot close" onclick="closeTargetApp('settings-window')"><span>✕</span></div>
+                <div class="dot min" onclick="closeTargetApp('settings-window')"><span>−</span></div>
+                <div class="dot max disabled-dot"><span>○</span></div>
+            </div>
+            <div style="margin-left: 20px; font-size: 13px; font-weight: 600;">Sistema</div>
+        </div>
+        <div style="padding: 20px;">
+            <p style="font-size: 14px; color: #333; margin-bottom: 15px;">Sesión y Energía:</p>
+            <button class="shutdown-btn" onclick="shutdownServer()">Apagar Servidor</button>
+        </div>
+    </div>
+
+    <div id="mini-dock">
+        <img class="dock-item" onclick="openAppGeneral('finder')" src="images/Finder.png" title="Finder">
+        <img class="dock-item" onclick="openAppGeneral('safari')" src="images/Safari@4x 1.png" title="Safari">
+        <img class="dock-item" onclick="openAppGeneral('settings')" src="images/Settings@4x 1.png" title="System Settings">
+        <img class="dock-item" src="images/Trash Empty.png" title="Trash">
+    </div>
+
+    <div id="window">
+        <div id="shutdown-overlay">
+            <h2 style="margin-bottom: 20px;">Servidor Apagado</h2>
+            <button class="power-on-btn" onclick="powerOn()">
+                <span class="status-dot"></span> Encender
+            </button>
+        </div>
+
+        <div class="title-bar">
+            <div class="dots">
+                <div class="dot close" onclick="closeApp()"><span>✕</span></div>
+                <div class="dot min" onclick="handleOrangeBtn()"><span>−</span></div>
+                <div class="dot max" onclick="maximizeApp()"><span>○</span></div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="content">
+                <div class="node-icon">
+                    <svg width="45" height="45" fill="var(--node-green)" viewBox="0 0 24 24"><path d="M12,2L4.5,6.3V17.7L12,22L19.5,17.7V6.3L12,2M12,4.1L17.7,7.4V16.6L12,19.9L6.3,16.6V7.4L12,4.1Z"/></svg>
+                </div>
+                <div class="badge"><span id="main-status-dot" class="status-dot"></span> <span id="status-text">ONLINE</span></div>
+                <div class="clock-display">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="server-time">00:00:00</span>
+                </div>
+                <h1 style="margin: 0 0 5px 0; font-size: 24px;">Server Control</h1>
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 25px;">Node.js v24 • High Performance Backend ⚡</p>
+
+                <div class="info-grid">
+                    <div class="card card-toggle" onclick="toggleEnv()" style="margin-bottom:0;">
+                        <span style="display:block; font-size:9px; font-weight:800; color:var(--text-dim);">AMBIENTE</span>
+                        <span id="env-val" style="font-family:'JetBrains Mono'; font-size:12px; font-weight:600;"></span>
+                    </div>
+                    <div class="card" style="margin-bottom:0;">
+                        <span style="display:block; font-size:9px; font-weight:800; color:var(--text-dim);">LATENCIA</span>
+                        <div><span class="status-dot ping"></span> <span id="ping-val" style="font-family:'JetBrains Mono'; font-size:12px; font-weight:600;">-- ms</span></div>
+                    </div>
+                    <a href="https://github.com/Fabian-Lugo/flutter-book-names" target="_blank" class="card" style="grid-column: span 2; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span style="display:block; font-size:9px; font-weight:800; color:var(--flutter-blue);">PROYECTO VINCULADO</span>
+                            <span style="font-size:13px; font-weight:700;">Book Names (Flutter)</span>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 48 48"><polygon fill="#40c4ff" points="26,4 6,24 12,30 38,4"/><polygon fill="#40c4ff" points="38,22 27,33 21,27 26,22"/><rect width="8.485" height="8.485" x="16.757" y="28.757" fill="#03a9f4" transform="rotate(-45.001 21 33)"/><polygon fill="#01579b" points="38,44 26,44 21,39 27,33"/><polygon fill="#084994" points="21,39 30,36 27,33"/></svg>
+                    </a>
+                </div>
+
+                <a href="https://github.com/Fabian-Lugo" target="_blank" class="github-btn" onclick="playClick()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.79 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/></svg>
+                    GitHub Profile
+                </a>
+            </div>
+
+            <div class="side-profile">
+                <div style="display:flex;align-items:center;gap:15px;margin-bottom:20px;">
+                    <h2 style="margin:0;font-size:28px;">Fabian Lugo</h2>
+                    <svg width="28" height="28" viewBox="0 0 36 36"><path fill="#D91023" d="M4 5a4 4 0 0 0-4 4v18a4 4 0 0 0 4 4h8V5H4z"/><path fill="#EEE" d="M12 5h12v26H12z"/><path fill="#D91023" d="M32 5h-8v26h8a4 4 0 0 0 4-4V9a4 4 0 0 0-4-4z"/></svg>
+                </div>
+                
+                <div class="fabian-info">
+                    <div class="info-row">🎂 <b>Edad:</b> <span id="my-age">15</span> años</div>
+                    <div class="info-row">📍 <b>Ubicación:</b> Lima, Perú ☁️</div>
+                    <div class="info-row">💙 <b>Lenguaje:</b> Flutter (Dart)</div>
+                    <div class="info-row">⏱️ <b>Aprendiendo:</b> <span id="learning-days">0</span> días</div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:25px;">
+                    <div class="card card-antigravity" style="flex:1;margin-bottom:0;">
+                        <svg style="width:30px;height:30px;fill:white" viewBox="0 0 24 24"><path d="m19.94,20.59c1.09.82,2.73.27,1.23-1.23-4.5-4.36-3.55-16.36-9.14-16.36S7.39,15,2.89,19.36c-1.64,1.64.14,2.05,1.23,1.23,4.23-2.86,3.95-7.91,7.91-7.91s3.68,5.05,7.91,7.91Z"/></svg>
+                        <div style="font-size:11px;margin-top:5px;font-weight:700;">Antigravity</div>
+                    </div>
+                    <div class="card" style="flex:1;margin-bottom:0;background:#000;color:white;">
+                        <svg style="width:30px;height:30px;" fill="none" viewBox="0 0 512 512"><rect width="512" height="512" rx="122" fill="#000"/><path d="M255.4 423l149-83.5L255.4 256l-149 83.5 149 83.5z" fill="rgba(255,255,255,0.6)"/><path d="M404.4 339.5v-167L255.4 89v167l149 83.5z" fill="rgba(255,255,255,0.2)"/><path d="M255.4 89l-149 83.5v167l149-83.5V89z" fill="rgba(255,255,255,0.4)"/><path d="M404.4 172.5L255.4 423V256l149-83.5z" fill="#E4E4E4"/><path d="M404.4 172.5L255.4 256l-149-83.5h298z" fill="#fff"/></svg>
+                        <div style="font-size:11px;margin-top:5px;font-weight:700;">Cursor Pro</div>
+                    </div>
+                </div>
+
+                <div class="credits">
+                    <svg class="gemini-logo" viewBox="0 0 24 24"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>
+                    <span>designed with <b>Gemini</b> by <b>Google</b></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="web.js"></script>
+</body>
+</html>
