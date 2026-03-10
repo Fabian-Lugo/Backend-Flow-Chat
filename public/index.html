@@ -11,20 +11,32 @@
     <script src="socket.io/socket.io.js"></script>
     <script>
         var socket = io();
-
+        //recibe el servidor
         socket.on('connect', function() {
+            //devuelve el servidor
             console.log('Conectado al servidor')
         })
-
+        //recibe el servidor
         socket.on('disconnect', function() {
+            //devuelve el servidor
             console.log('Perdimos conexión con el servidor')
         })
-
-        socket.emit('message', {nombre: 'Fabian'});
-
-        socket.on('mensaje', function(payload) {
-            console.log('Escuchando:', payload)
-        })
+        //emite el servidor
+        //socket.emit('message', {nombre: 'Fabian'});
+        //recibe el servidor
+        socket.on('mensaje', function(data) {
+            //devuelve el servidor
+            console.log('Escuchando:', data)
+        });
+        socket.on('nuevo-mensaje-app', function(data) {
+            //devuelve el servidor
+            console.log('Mensaje desde flutter:', data)
+        });
+        socket.on('active-books', function(data) {
+            //devuelve el servidor
+            console.clear();
+            console.table(data)
+        });
         
     </script>
     <script>
@@ -72,11 +84,10 @@
 <body onload="initApp()">
 
 
-    <audio id="popSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="popSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2585/2585-preview.mp3"></audio>
     <audio id="minSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2582/2582-preview.mp3"></audio>
     <audio id="clickSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-    <audio id="hoverSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2565/2565-preview.mp3"></audio>
-    <audio id="maxSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+    <audio id="maxSnd" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/1109/1109-preview.mp3"></audio>
 
     <svg style="position:absolute;width:0;height:0">
         <defs>
