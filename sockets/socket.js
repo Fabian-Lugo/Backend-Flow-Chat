@@ -18,13 +18,6 @@ io.on('connection', client => {
     console.log('Cliente desconectado')
   });
   
-  /* Web de html */
-  
-  //recibe el servidor
- /*  client.on('message', (payload) => {
-    //emite el servidor
-    io.emit('mensaje', {admin: 'Nuevo mensaje'});
-  }) */
   
   client.emit('active-books', books.getBooks());
 
@@ -44,12 +37,4 @@ io.on('connection', client => {
     io.emit('active-books', books.getBooks());
   })
 
-  /* App de Flutter */
-  
-  //recibe el servidor
- /*  client.on('emitir-mensaje', (data) => {
-    //console.log(payload)
-    //io.emit('nuevo-mensaje-app', payload)  //emite el servidor a todos
-    client.broadcast.emit('nuevo-mensaje-app', data)  //emite el servidor a todos menos al que lo emitio
-  });  */
 });
