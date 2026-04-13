@@ -33,7 +33,6 @@ const signInUser = async(request, res = response) => {
 
       res.json({
          validate: true,
-         online: user.online,
          user: user,
          token: token,
        })
@@ -73,7 +72,6 @@ const signUpUser = async(request, res = response) => {
         
         res.json({
           validate: true,
-          online: user.online,
           user: user,
           token: token,
         })
