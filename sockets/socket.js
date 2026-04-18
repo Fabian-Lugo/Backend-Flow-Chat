@@ -1,13 +1,5 @@
 const {io} = require('../index');
 
-console.log('-- Server Iniciado --');
+console.log('[Socket.IO] Motor de tiempo real listo');
 
-//Mensajes de sockets
-io.on('connection', client => {
-  console.log('Cliente conectado')
-  
-  client.on('disconnect', () => {
-    console.log('Cliente desconectado')
-  });
-
-});
+io.on('connection', () => {});

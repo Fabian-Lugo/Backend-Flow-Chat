@@ -31,7 +31,11 @@ app.use(express.static(publicPath));
 //Mis rutas
 app.use('/auth', require('./routes/auth'));
 
-server.listen(process.env.PORT, (error) => {
-  if (error) throw new Error(error);
-  console.log('Servidor corriendo en puerto', process.env.PORT);
-});
+server
+  .listen(process.env.PORT, () => {
+    console.log(`[HTTP] Servidor escuchando en puerto ${process.env.PORT}`);
+  })
+  .on('error', (err) => {
+    console.error('[HTTP] No se pudo iniciar el servidor:', err.message);
+    process.exit(1);
+  });

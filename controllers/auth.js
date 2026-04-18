@@ -17,7 +17,7 @@ const signInUser = async(request, res = response) => {
         })
       }
 
-      // Comparar las contraseñas
+      // Compara las contraseñas
       const isValidPassword = bcrypt.compareSync(password, user.password);
 
       if (!isValidPassword){
@@ -36,8 +36,7 @@ const signInUser = async(request, res = response) => {
          user: user,
          token: token,
        })
-    } catch (error) {
-      console.log(error);
+    } catch {
       res.status(500).json({
         status: res.statusCode,
         message: "Server error",
@@ -48,7 +47,6 @@ const signInUser = async(request, res = response) => {
 const signUpUser = async(request, res = response) => {
     const { email, password } = request.body;
 
-    
     try {
         const emailUsed = await User.findOne({email})
         if (emailUsed) {
@@ -75,8 +73,7 @@ const signUpUser = async(request, res = response) => {
           user: user,
           token: token,
         })
-    } catch (error) {
-      console.log(error);
+    } catch {
       res.status(500).json({
         status: res.statusCode,
         message: "Server error",
@@ -106,8 +103,7 @@ const refreshToken = async(request, res = response) => {
         refreshToken: refreshToken,
       })
 
-    } catch (error) {
-      console.log(error);
+    } catch {
       res.status(500).json({
           validate: false,
           message: "Server error",

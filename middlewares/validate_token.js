@@ -17,8 +17,7 @@ const validateToken = (request, response, next) => {
       request.uid = uid;
 
       next();
-  } catch (error) {
-    console.log(error);
+  } catch {
     response.status(500).json({
       status: response.statusCode,
       message: "Invalid token",

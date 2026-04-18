@@ -8,8 +8,8 @@ const generateJWT = (uid, name, email) => {
       expiresIn: '12h',
     }, (err, token) => {
       if (err){
-          //no se creo el token
-          reject('No se pudo generar el Token')
+          //no se crea el token
+          reject('No se logro crear el token')
       } else {
           //Token
           resolve(token)
