@@ -1,5 +1,5 @@
-const {io} = require('../index');
+const { io } = require("../index");
 
-console.log('[Socket.IO] Motor de tiempo real listo');
+console.log("[Socket.IO] Motor de tiempo real listo");
 
-io.on('connection', () => {});
+io.on("connection", () => {});
