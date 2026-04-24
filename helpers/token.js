@@ -23,6 +23,17 @@ const generateJWT = (uid, name, email) => {
   });
 };
 
+const verifyToken = (tokenString) => {
+  try {
+    const { uid } = token.verify(tokenString, process.env.JWT_KEY);
+
+    return [true, uid];
+  } catch {
+    return [false, null];
+  }
+};
+
 module.exports = {
   generateJWT,
+  verifyToken,
 };
